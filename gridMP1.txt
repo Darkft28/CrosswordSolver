@@ -1,0 +1,2 @@
+# Grille MP1 — à remplir
+# Format : '_' = case blanche, '#' = case noire

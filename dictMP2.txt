@@ -1,0 +1,2 @@
+# Dictionnaire MP2 — à remplir
+# Format : un mot par ligne
