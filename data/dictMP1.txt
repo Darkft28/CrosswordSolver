@@ -1,2 +1,14 @@
-# Dictionnaire MP1 — à remplir
-# Format : un mot par ligne
+ant
+big
+bus
+car
+has
+book
+buys
+hold
+lane
+year
+ginger
+search
+symbol
+syntax
