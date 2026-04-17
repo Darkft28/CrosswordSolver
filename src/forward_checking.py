@@ -1,48 +1,93 @@
-"""
-forward_checking.py — Algorithme FC et FC + heuristique MRV
-"""
+import time
 
 
-def forward_checking(variables, domains, intersections):
-    """
-    À chaque assignation, propage les contraintes : retire des domaines
-    des variables non assignées les mots incompatibles avec le mot placé.
-    Restauration par mémorisation des mots supprimés (pas de deepcopy).
-    Backtrack immédiat si un domaine devient vide.
-    Retourne : (solution: dict, nb_backtracks: int)
-    """
-    pass
+def forward_checking(variables, domaines, intersections, limite=None):
+    solution = {}
+    nb_bt = [0]
+    stop = [False]
+    debut = time.time()
+
+    def resoudre(restantes):
+        if stop[0]:
+            return False
+        if not restantes:
+            return True
+        if limite and time.time() - debut > limite:
+            stop[0] = True
+            return False
+        v = restantes[0]
+        for mot in list(domaines[v]):
+            if stop[0]:
+                return False
+            solution[v] = mot
+            supprimes = _propager(v, mot, domaines, intersections, solution)
+            if supprimes is not None:
+                if resoudre(restantes[1:]):
+                    return True
+                _restaurer(supprimes, domaines)
+            del solution[v]
+            nb_bt[0] += 1
+        return False
+
+    resoudre(list(variables))
+    return solution, nb_bt[0]
 
 
-def forward_checking_mrv(variables, domains, intersections):
-    """
-    Identique à forward_checking, avec l'heuristique MRV :
-    à chaque étape, choisit la variable non assignée dont le domaine
-    courant est le plus petit.
-    Retourne : (solution: dict, nb_backtracks: int)
-    """
-    pass
+def forward_checking_mrv(variables, domaines, intersections, limite=None):
+    solution = {}
+    nb_bt = [0]
+    stop = [False]
+    debut = time.time()
+
+    def resoudre(restantes):
+        if stop[0]:
+            return False
+        if not restantes:
+            return True
+        if limite and time.time() - debut > limite:
+            stop[0] = True
+            return False
+        v = min(restantes, key=lambda x: len(domaines[x]))
+        autres = [u for u in restantes if u != v]
+        for mot in list(domaines[v]):
+            if stop[0]:
+                return False
+            solution[v] = mot
+            supprimes = _propager(v, mot, domaines, intersections, solution)
+            if supprimes is not None:
+                if resoudre(autres):
+                    return True
+                _restaurer(supprimes, domaines)
+            del solution[v]
+            nb_bt[0] += 1
+        return False
+
+    resoudre(list(variables))
+    return solution, nb_bt[0]
 
 
-def _propagate(var, word, domains, intersections, assignment):
-    """
-    Retire des domaines les mots incompatibles suite à l'assignation de `word` à `var`.
-    Retourne la liste des (variable, mot_supprimé) pour permettre la restauration.
-    Retourne None si un domaine devient vide (échec détecté).
-    """
-    pass
+def _propager(v, mot, domaines, intersections, solution):
+    supprimes = []
+    for (v1, p1), (v2, p2) in intersections:
+        if v1 == v:
+            voisine, pm, pv = v2, p1, p2
+        elif v2 == v:
+            voisine, pm, pv = v1, p2, p1
+        else:
+            continue
+        if voisine in solution:
+            continue
+        lettre = mot[pm]
+        for m in list(domaines[voisine]):
+            if m[pv] != lettre:
+                domaines[voisine].remove(m)
+                supprimes.append((voisine, m))
+        if not domaines[voisine]:
+            _restaurer(supprimes, domaines)
+            return None
+    return supprimes
 
 
-def _restore(pruned, domains):
-    """
-    Réinsère dans les domaines les mots précédemment supprimés.
-    pruned : liste de (variable, mot_supprimé) retournée par _propagate.
-    """
-    pass
-
-
-def _select_unassigned_mrv(variables, domains, assignment):
-    """
-    Sélectionne la variable non assignée avec le domaine le plus petit (MRV).
-    """
-    pass
+def _restaurer(supprimes, domaines):
+    for v, m in supprimes:
+        domaines[v].append(m)

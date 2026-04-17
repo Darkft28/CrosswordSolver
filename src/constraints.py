@@ -1,22 +1,13 @@
-"""
-constraints.py — Détection des intersections et vérification de compatibilité
-"""
-
-
 def get_intersections(variables):
-    """
-    Identifie toutes les paires de variables qui partagent une case
-    (un mot horizontal croise un mot vertical).
-    Retourne une liste de tuples : ((var1, pos1), (var2, pos2))
-      - var1, var2 : variables (i, j, h, l)
-      - pos1, pos2 : indices dans chaque mot correspondant à la case partagée
-    """
-    pass
-
-
-def is_compatible(word1, pos1, word2, pos2):
-    """
-    Vérifie que word1[pos1] == word2[pos2].
-    Retourne True si les deux mots sont compatibles à leur intersection.
-    """
-    pass
+    intersections = []
+    for a in range(len(variables)):
+        for b in range(a + 1, len(variables)):
+            v1, v2 = variables[a], variables[b]
+            if v1[2] == v2[2]:
+                continue
+            vh, vv = (v1, v2) if v1[2] else (v2, v1)
+            ih, jh, lh = vh[0], vh[1], vh[3]
+            iv, jv, lv = vv[0], vv[1], vv[3]
+            if iv <= ih < iv + lv and jh <= jv < jh + lh:
+                intersections.append(((vh, jv - jh), (vv, ih - iv)))
+    return intersections

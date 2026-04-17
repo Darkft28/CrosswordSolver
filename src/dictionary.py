@@ -1,18 +1,7 @@
-"""
-dictionary.py — Chargement du dictionnaire et construction des domaines
-"""
-
-
 def load_dict(path):
-    """
-    Lit un fichier .txt (un mot par ligne) et retourne une list[str].
-    """
-    pass
+    with open(path, encoding='utf-8') as f:
+        return [line.strip() for line in f if line.strip()]
 
 
-def get_domains(variables, words):
-    """
-    Retourne un dict[tuple, list[str]] associant à chaque variable
-    la liste des mots dont la longueur correspond à l (longueur de la variable).
-    """
-    pass
+def get_domains(variables, mots):
+    return {v: [m for m in mots if len(m) == v[3]] for v in variables}
